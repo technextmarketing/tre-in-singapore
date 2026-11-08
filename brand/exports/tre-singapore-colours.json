@@ -1,0 +1,363 @@
+{
+ "brand": "TRE™ in Singapore",
+ "source": "tre-in-singapore.com, checked 15 Oct 2026",
+ "colours": [
+  {
+   "name": "Navy",
+   "role": "Headings, navy buttons.",
+   "group": "primary",
+   "hex": "#1C3D7A",
+   "rgb": [
+    28,
+    61,
+    122
+   ],
+   "cmyk": [
+    77,
+    50,
+    0,
+    52
+   ]
+  },
+  {
+   "name": "Bronze",
+   "role": "Taglines, labels, tremor lines.",
+   "group": "primary",
+   "hex": "#8B6B45",
+   "rgb": [
+    139,
+    107,
+    69
+   ],
+   "cmyk": [
+    0,
+    23,
+    50,
+    45
+   ]
+  },
+  {
+   "name": "Cream",
+   "role": "Section ground.",
+   "group": "primary",
+   "hex": "#FAF6EF",
+   "rgb": [
+    250,
+    246,
+    239
+   ],
+   "cmyk": [
+    0,
+    2,
+    4,
+    2
+   ]
+  },
+  {
+   "name": "Orange",
+   "role": "The one primary call to action in view.",
+   "group": "primary",
+   "hex": "#E08A2E",
+   "rgb": [
+    224,
+    138,
+    46
+   ],
+   "cmyk": [
+    0,
+    38,
+    79,
+    12
+   ]
+  },
+  {
+   "name": "Gold",
+   "role": "Accents, dividers, tremor lines.",
+   "group": "primary",
+   "hex": "#C9A45C",
+   "rgb": [
+    201,
+    164,
+    92
+   ],
+   "cmyk": [
+    0,
+    18,
+    54,
+    21
+   ]
+  },
+  {
+   "name": "Navy deep",
+   "role": "Footer, dark bands.",
+   "group": "support",
+   "hex": "#132B56",
+   "rgb": [
+    19,
+    43,
+    86
+   ],
+   "cmyk": [
+    78,
+    50,
+    0,
+    66
+   ]
+  },
+  {
+   "name": "Navy ink",
+   "role": "Hero fields; label on orange.",
+   "group": "support",
+   "hex": "#0F1F3D",
+   "rgb": [
+    15,
+    31,
+    61
+   ],
+   "cmyk": [
+    75,
+    49,
+    0,
+    76
+   ]
+  },
+  {
+   "name": "Blue",
+   "role": "Links.",
+   "group": "support",
+   "hex": "#2A63A8",
+   "rgb": [
+    42,
+    99,
+    168
+   ],
+   "cmyk": [
+    75,
+    41,
+    0,
+    34
+   ]
+  },
+  {
+   "name": "Blue tint",
+   "role": "Soft fills.",
+   "group": "support",
+   "hex": "#F4F7FC",
+   "rgb": [
+    244,
+    247,
+    252
+   ],
+   "cmyk": [
+    3,
+    2,
+    0,
+    1
+   ]
+  },
+  {
+   "name": "Bronze soft",
+   "role": "Soft lines.",
+   "group": "support",
+   "hex": "#B89A72",
+   "rgb": [
+    184,
+    154,
+    114
+   ],
+   "cmyk": [
+    0,
+    16,
+    38,
+    28
+   ]
+  },
+  {
+   "name": "Gold soft",
+   "role": "Soft panels, gold badges.",
+   "group": "support",
+   "hex": "#F3E8D2",
+   "rgb": [
+    243,
+    232,
+    210
+   ],
+   "cmyk": [
+    0,
+    5,
+    14,
+    5
+   ]
+  },
+  {
+   "name": "Brown",
+   "role": "The word “Singapore”; gold badge text.",
+   "group": "support",
+   "hex": "#5F4630",
+   "rgb": [
+    95,
+    70,
+    48
+   ],
+   "cmyk": [
+    0,
+    26,
+    49,
+    63
+   ]
+  },
+  {
+   "name": "Orange deep",
+   "role": "Call-to-action hover.",
+   "group": "support",
+   "hex": "#C4741D",
+   "rgb": [
+    196,
+    116,
+    29
+   ],
+   "cmyk": [
+    0,
+    41,
+    85,
+    23
+   ]
+  },
+  {
+   "name": "Cream 2",
+   "role": "Second cream ground.",
+   "group": "support",
+   "hex": "#F2E9DB",
+   "rgb": [
+    242,
+    233,
+    219
+   ],
+   "cmyk": [
+    0,
+    4,
+    10,
+    5
+   ]
+  },
+  {
+   "name": "Ink",
+   "role": "Body text.",
+   "group": "support",
+   "hex": "#1B2536",
+   "rgb": [
+    27,
+    37,
+    54
+   ],
+   "cmyk": [
+    50,
+    31,
+    0,
+    79
+   ]
+  },
+  {
+   "name": "Muted",
+   "role": "Secondary text, the lightest allowed.",
+   "group": "support",
+   "hex": "#5F6B7D",
+   "rgb": [
+    95,
+    107,
+    125
+   ],
+   "cmyk": [
+    24,
+    14,
+    0,
+    51
+   ]
+  },
+  {
+   "name": "Line",
+   "role": "Hairlines.",
+   "group": "support",
+   "hex": "#E4DFD6",
+   "rgb": [
+    228,
+    223,
+    214
+   ],
+   "cmyk": [
+    0,
+    2,
+    6,
+    11
+   ]
+  },
+  {
+   "name": "Green",
+   "role": "Success.",
+   "group": "support",
+   "hex": "#2F8F5B",
+   "rgb": [
+    47,
+    143,
+    91
+   ],
+   "cmyk": [
+    67,
+    0,
+    36,
+    44
+   ]
+  },
+  {
+   "name": "Red",
+   "role": "Errors.",
+   "group": "support",
+   "hex": "#B9412F",
+   "rgb": [
+    185,
+    65,
+    47
+   ],
+   "cmyk": [
+    0,
+    65,
+    75,
+    27
+   ]
+  },
+  {
+   "name": "Logo navy",
+   "role": "Inside the logo artwork.",
+   "group": "support",
+   "hex": "#003769",
+   "rgb": [
+    0,
+    55,
+    105
+   ],
+   "cmyk": [
+    100,
+    48,
+    0,
+    59
+   ]
+  },
+  {
+   "name": "Logo bronze",
+   "role": "Inside the logo artwork.",
+   "group": "support",
+   "hex": "#73533B",
+   "rgb": [
+    115,
+    83,
+    59
+   ],
+   "cmyk": [
+    0,
+    28,
+    49,
+    55
+   ]
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+/* TRE™ in Singapore colour variables */
+:root{
+  --tre-navy: #1c3d7a; /* Headings, navy buttons. */
+  --tre-bronze: #8b6b45; /* Taglines, labels, tremor lines. */
+  --tre-cream: #faf6ef; /* Section ground. */
+  --tre-orange: #e08a2e; /* The one primary call to action in view. */
+  --tre-gold: #c9a45c; /* Accents, dividers, tremor lines. */
+  --tre-navy-deep: #132b56; /* Footer, dark bands. */
+  --tre-navy-ink: #0f1f3d; /* Hero fields; label on orange. */
+  --tre-blue: #2a63a8; /* Links. */
+  --tre-blue-tint: #f4f7fc; /* Soft fills. */
+  --tre-bronze-soft: #b89a72; /* Soft lines. */
+  --tre-gold-soft: #f3e8d2; /* Soft panels, gold badges. */
+  --tre-brown: #5f4630; /* The word “Singapore”; gold badge text. */
+  --tre-orange-deep: #c4741d; /* Call-to-action hover. */
+  --tre-cream-2: #f2e9db; /* Second cream ground. */
+  --tre-ink: #1b2536; /* Body text. */
+  --tre-muted: #5f6b7d; /* Secondary text, the lightest allowed. */
+  --tre-line: #e4dfd6; /* Hairlines. */
+  --tre-green: #2f8f5b; /* Success. */
+  --tre-red: #b9412f; /* Errors. */
+  --tre-logo-navy: #003769; /* Inside the logo artwork. */
+  --tre-logo-bronze: #73533b; /* Inside the logo artwork. */
+}
