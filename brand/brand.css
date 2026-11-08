@@ -364,3 +364,40 @@ dialog.lb::backdrop{background:rgba(15,31,61,.82)}
 .still *,.still *:before{animation:none!important}
 @media (max-width:900px){.cover-credit{display:none}}
 
+
+/* release field demo (8 Nov 2026) */
+/* =========================================================
+   RELEASE FIELD heroes (8 Nov 2026): every hero but the home page's has no photo.
+   .hx-aura = the room (navy depth + three drifting light orbs that lean toward the pointer)
+   canvas = the canvas (layer.js field())
+   Orbs move with transform/translate only; the grain is one static SVG.
+   ========================================================= */
+.field.rel{height:320px;isolation:isolate;cursor:crosshair}
+.field.rel[data-theme="gold"]{--o1:201,164,92;--o2:58,98,170;--o3:232,150,70}
+.field.rel[data-theme="blue"]{--o1:88,140,230;--o2:201,164,92;--o3:60,190,210}
+.field.rel[data-theme="bronze"]{--o1:214,140,100;--o2:70,100,170;--o3:201,164,92}
+.field.rel[data-theme="mist"]{--o1:150,190,230;--o2:201,164,92;--o3:120,110,200}
+.hx-aura{position:absolute;inset:0;z-index:-3;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(120% 80% at 100% 0%,rgba(var(--o2),.22) 0%,rgba(var(--o2),0) 60%),
+    radial-gradient(90% 70% at 0% 100%,rgba(var(--o1),.14) 0%,rgba(var(--o1),0) 60%),
+    linear-gradient(160deg,#0b1730 0%,#122a52 52%,#0a1630 100%)}
+.hx-aura::after{content:"";position:absolute;inset:0;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hx-aura i{position:absolute;display:block;border-radius:50%;will-change:transform}
+.hx-aura .o1{width:62vmax;height:62vmax;right:-16vmax;top:-22vmax;background:radial-gradient(circle,rgba(var(--o1),.34) 0%,rgba(var(--o1),.12) 38%,rgba(var(--o1),0) 68%);
+  translate:calc(var(--mx,0) * 60px) calc(var(--my,0) * 40px);animation:hx-orb1 22s var(--ease-breath,ease-in-out) infinite alternate}
+.hx-aura .o2{width:48vmax;height:48vmax;left:-14vmax;bottom:-26vmax;background:radial-gradient(circle,rgba(var(--o2),.28) 0%,rgba(var(--o2),.08) 42%,rgba(var(--o2),0) 70%);
+  translate:calc(var(--mx,0) * -40px) calc(var(--my,0) * -30px);animation:hx-orb2 28s ease-in-out infinite alternate}
+.hx-aura .o3{width:26vmax;height:26vmax;right:22%;bottom:-8vmax;background:radial-gradient(circle,rgba(var(--o3),.22) 0%,rgba(var(--o3),0) 66%);
+  translate:calc(var(--mx,0) * 90px) calc(var(--my,0) * 70px);animation:hx-orb3 17s ease-in-out infinite alternate}
+@keyframes hx-orb1{from{transform:translate(0,0) scale(1)}to{transform:translate(-6vmax,5vmax) scale(1.12)}}
+@keyframes hx-orb2{from{transform:translate(0,0) scale(1.05)}to{transform:translate(7vmax,-4vmax) scale(.92)}}
+@keyframes hx-orb3{from{transform:translate(0,0) scale(.9)}to{transform:translate(-9vmax,-6vmax) scale(1.15)}}
+.field.rel.is-off .hx-aura i,.motion-paused .field.rel .hx-aura i{animation-play-state:paused}
+.field.rel canvas{z-index:-1;cursor:crosshair}
+.field.rel{cursor:crosshair}
+.field.rel a,.field.rel button{cursor:pointer}
+
+@media (prefers-reduced-motion:reduce){.hx-aura i{animation:none!important}}
+@media print{.hx-aura{display:none!important}}

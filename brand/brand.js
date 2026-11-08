@@ -127,7 +127,201 @@
     loop();
   }
   tremorField($('#coverTremor'), { lines: 11, c1: '#c9a45c', c2: '#b89a72', fade: .5, alpha: .8 });
-  tremorField($('#field canvas'), { lines: 8, c1: '#c9a45c', c2: '#b89a72', fade: .9, alpha: .85 });
+
+  /* ---------- the release field (the site's layer.js field(), 8 Nov 2026) ---------- */
+  var REDUCED = RM; function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function onVisible(el, cb) { if (!('IntersectionObserver' in window)) { cb(null, true); return; } new IntersectionObserver(function (es) { es.forEach(function (e) { cb(e, e.isIntersecting); }); }).observe(el); }
+  var motion = { on: function () {} };
+  /* =========================================================
+     RELEASE FIELD (8 Nov 2026) - the animated background of every hero except the home page's.
+     No photo: a navy room with two drifting light orbs (CSS, compositor only) and one canvas:
+       - contour lines that breathe like a body at rest and bend apart around the pointer,
+       - a click / tap sends a "release" shockwave that ripples through the lines as a tremor,
+       - gold dust that drifts upward and scatters from the pointer,
+       - idle pulses so it stays alive on phones.
+     One rAF loop, ~30 fps at rest and 60 fps while the pointer moves, stops off screen / in a
+     background tab / with the motion switch; one still frame under reduced motion.
+     ========================================================= */
+  var THEMES = {
+    gold:   { line: '201,164,92',  glow: '255,214,140', dust: '232,196,120' },
+    blue:   { line: '120,165,235', glow: '196,220,255', dust: '210,190,140' },
+    bronze: { line: '214,150,112', glow: '255,200,160', dust: '236,186,140' },
+    mist:   { line: '170,196,224', glow: '255,236,200', dust: '226,206,160' }
+  };
+  function themeFor(hero) {
+    if (hero.getAttribute('data-theme')) return hero.getAttribute('data-theme');
+    var p = location.pathname;
+    if (/\/(events|event)\b/.test(p)) return 'gold';
+    if (/(education|certification|online-session-guide|certified-tre-providers)/.test(p)) return 'blue';
+    if (/\/blog/.test(p)) return 'bronze';
+    return 'mist';
+  }
+  function field(hero) {
+    var canvas = $('.hx-tremor', hero);
+    if (!canvas) { canvas = document.createElement('canvas'); canvas.setAttribute('aria-hidden', 'true'); hero.appendChild(canvas); }
+    canvas.className = 'hx-tremor hx-field';
+    var theme = themeFor(hero), T = THEMES[theme] || THEMES.gold;
+    hero.classList.add('hx-live'); hero.setAttribute('data-theme', theme);
+    if (!$('.hx-aura', hero)) {
+      var aura = document.createElement('div'); aura.className = 'hx-aura'; aura.setAttribute('aria-hidden', 'true');
+      aura.innerHTML = '<i class="o1"></i><i class="o2"></i><i class="o3"></i>';
+      hero.insertBefore(aura, hero.firstChild);
+    }
+    var auraEl = $('.hx-aura', hero);
+    var ctx = canvas.getContext('2d'), dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    var W = 1, H = 1, N = 18, STEP = 12, seed = 0;
+    for (var si = 0; si < location.pathname.length; si++) seed = (seed * 31 + location.pathname.charCodeAt(si)) % 997;
+    var ph = seed / 997 * Math.PI * 2;
+    var px = -1e4, py = -1e4, sx = -1e4, sy = -1e4, power = 0, inside = false, lastMove = 0;
+    var waves = [], dust = [], running = false, raf = 0, last = 0, t0 = performance.now(), visible = false, lastPulse = performance.now();
+
+    function size() {
+      var r = hero.getBoundingClientRect();
+      W = Math.max(1, r.width); H = Math.max(1, r.height);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      N = Math.round(clamp(H / 30, 12, 24)); STEP = W < 700 ? 14 : 11;
+      var want = W < 700 ? 22 : 46;
+      while (dust.length < want) dust.push(newDust(true));
+      dust.length = want;
+    }
+    function newDust(anywhere) {
+      return { x: Math.random() * W, y: anywhere ? Math.random() * H : H + 10, vx: (Math.random() - .5) * 6, vy: -(6 + Math.random() * 14),
+               r: .6 + Math.random() * 1.6, a: .25 + Math.random() * .55, tw: Math.random() * 6.28 };
+    }
+    function pulse(x, y, amp) { waves.push({ x: x, y: y, t: performance.now(), amp: amp || 1 }); if (waves.length > 5) waves.shift(); wake(); }
+
+    function draw(now) {
+      var active = inside && now - lastMove < 1200;
+      var minGap = active || waves.length ? 15 : 31;                 /* ~60 fps while touched, ~30 fps at rest */
+      if (running && last && now - last < minGap) { raf = requestAnimationFrame(draw); return; }
+      var dt = Math.min(.05, last ? (now - last) / 1000 : .016); last = now;
+      var t = (now - t0) / 1000;
+      var still = paused;
+      var tw = still ? 0 : t;
+      /* pointer smoothing + strength */
+      sx += (px - sx) * Math.min(1, dt * 9); sy += (py - sy) * Math.min(1, dt * 9);
+      power += ((inside ? 1 : 0) - power) * Math.min(1, dt * 4);
+      if (auraEl && inside) { auraEl.style.setProperty('--mx', ((sx / W) - .5).toFixed(3)); auraEl.style.setProperty('--my', ((sy / H) - .5).toFixed(3)); }
+      /* idle release pulse every ~6 s so it is alive without a pointer */
+      if (!REDUCED && !still && now - lastPulse > 6000 && now - lastMove > 2500) { lastPulse = now; pulse(W * (.55 + Math.random() * .4), H * (.25 + Math.random() * .55), .7); }
+      waves = waves.filter(function (w) { return (now - w.t) < 3200; });
+
+      ctx.clearRect(0, 0, W, H);
+      var breath = .62 + .38 * Math.sin(tw * 2 * Math.PI / 9 + ph);
+      var R = Math.max(120, Math.min(220, W * .14)), R2 = 2 * R * R;
+      var amp = Math.max(10, Math.min(26, H * .035));
+      ctx.beginPath();
+      for (var i = 0; i < N; i++) {
+        var k = i / (N - 1), base = H * (.06 + .9 * k);
+        for (var x = -STEP, j = 0; x <= W + STEP; x += STEP, j++) {
+          var y = base + amp * breath * (Math.sin(x * .0062 + tw * .55 + i * .52 + ph) * .62 + Math.sin(x * .0131 - tw * .33 + i * 1.27) * .38);
+          /* the pointer parts the lines like a hand on water */
+          var dx = x - sx, dy = base - sy, d2 = dx * dx + dy * dy;
+          if (power > .01 && d2 < R2 * 4) { var g = Math.exp(-d2 / R2); y += (dy >= 0 ? 1 : -1) * g * 42 * power; }
+          /* release waves: a travelling ring that shivers the lines as it passes */
+          for (var wi = 0; wi < waves.length; wi++) {
+            var wv = waves[wi], age = (now - wv.t) / 1000, rad = age * 420, dd = Math.sqrt((x - wv.x) * (x - wv.x) + (base - wv.y) * (base - wv.y)) - rad;
+            if (dd > -90 && dd < 90) y += Math.sin(dd * .11 - age * 18) * Math.exp(-(dd * dd) / 2600) * 22 * wv.amp * Math.max(0, 1 - age / 3.2);
+          }
+          if (j === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+      }
+      /* pass 1: the field, quiet behind the copy (left) and stronger toward the right */
+      var lg = ctx.createLinearGradient(0, 0, W, 0);
+      var narrow = W < 700;
+      lg.addColorStop(0, 'rgba(' + T.line + ',' + (narrow ? .16 : .1) + ')');
+      lg.addColorStop(.5, 'rgba(' + T.line + ',' + (narrow ? .22 : .26) + ')');
+      lg.addColorStop(1, 'rgba(' + T.line + ',.42)');
+      ctx.lineWidth = 1.1; ctx.strokeStyle = lg; ctx.stroke();
+      /* pass 2: light where the pointer is */
+      if (power > .02) {
+        var rg = ctx.createRadialGradient(sx, sy, 0, sx, sy, R * 1.6);
+        rg.addColorStop(0, 'rgba(' + T.glow + ',' + (.85 * power).toFixed(3) + ')');
+        rg.addColorStop(1, 'rgba(' + T.glow + ',0)');
+        ctx.lineWidth = 1.6; ctx.strokeStyle = rg; ctx.stroke();
+      }
+      /* the resonance core: concentric rings on the open side that breathe, wobble with the waves and lean to the pointer */
+      var cxC = narrow ? W * .92 : W * .76, cyC = narrow ? H * .9 : H * .52, RC = narrow ? Math.min(W, H) * .32 : Math.min(H * .36, W * .2);
+      cxC += (sx > -1e3 ? (sx - cxC) * .06 * power : 0); cyC += (sy > -1e3 ? (sy - cyC) * .06 * power : 0);
+      for (var ri = 0; ri < 7; ri++) {
+        var rr = RC * (.28 + ri * .13) * (.94 + .06 * breath), wob = 3 + ri * 1.4;
+        ctx.beginPath();
+        for (var ai = 0; ai <= 64; ai++) {
+          var an = ai / 64 * 6.2832, rx = rr + Math.sin(an * 3 + tw * (.7 + ri * .08) + ri) * wob + Math.sin(an * 5 - tw * .9 + ri * 2) * wob * .5;
+          for (var wq = 0; wq < waves.length; wq++) {
+            var wz = waves[wq], az = (now - wz.t) / 1000, ux = cxC + Math.cos(an) * rr - wz.x, uy = cyC + Math.sin(an) * rr - wz.y, dz = Math.sqrt(ux * ux + uy * uy) - az * 420;
+            if (dz > -80 && dz < 80) rx += Math.sin(dz * .12 - az * 16) * Math.exp(-(dz * dz) / 2400) * 10 * wz.amp * Math.max(0, 1 - az / 3.2);
+          }
+          var qx = cxC + Math.cos(an) * rx, qy = cyC + Math.sin(an) * rx * .92;
+          if (ai === 0) ctx.moveTo(qx, qy); else ctx.lineTo(qx, qy);
+        }
+        ctx.strokeStyle = 'rgba(' + (ri % 2 ? T.line : T.glow) + ',' + ((narrow ? .1 : .16) + (6 - ri) * .022 + .12 * power).toFixed(3) + ')';
+        ctx.lineWidth = ri === 0 ? 1.6 : 1; ctx.stroke();
+      }
+      var cg = ctx.createRadialGradient(cxC, cyC, 0, cxC, cyC, RC * .5);
+      cg.addColorStop(0, 'rgba(' + T.glow + ',' + (.16 + .1 * breath).toFixed(3) + ')'); cg.addColorStop(1, 'rgba(' + T.glow + ',0)');
+      ctx.fillStyle = cg; ctx.fillRect(cxC - RC, cyC - RC, RC * 2, RC * 2);
+      /* the release rings themselves */
+      for (var wj = 0; wj < waves.length; wj++) {
+        var w2 = waves[wj], a2 = (now - w2.t) / 1000, fade = Math.max(0, 1 - a2 / 2.4);
+        if (fade <= 0) continue;
+        ctx.beginPath(); ctx.arc(w2.x, w2.y, a2 * 420, 0, 6.2832);
+        ctx.strokeStyle = 'rgba(' + T.glow + ',' + (.32 * fade * w2.amp).toFixed(3) + ')'; ctx.lineWidth = 1.4; ctx.stroke();
+        ctx.beginPath(); ctx.arc(w2.x, w2.y, Math.max(0, a2 * 420 - 26), 0, 6.2832);
+        ctx.strokeStyle = 'rgba(' + T.line + ',' + (.18 * fade * w2.amp).toFixed(3) + ')'; ctx.lineWidth = 1; ctx.stroke();
+      }
+      /* gold dust: rises, twinkles, scatters from the pointer and from release rings */
+      for (var di = 0; di < dust.length; di++) {
+        var p = dust[di];
+        if (!still) {
+          var ddx = p.x - sx, ddy = p.y - sy, dd2 = ddx * ddx + ddy * ddy;
+          if (power > .02 && dd2 < 16000) { var f = (1 - dd2 / 16000) * 260 * power; var dl = Math.sqrt(dd2) || 1; p.vx += ddx / dl * f * dt; p.vy += ddy / dl * f * dt; }
+          for (var wk = 0; wk < waves.length; wk++) {
+            var w3 = waves[wk], a3 = (now - w3.t) / 1000, ex = p.x - w3.x, ey = p.y - w3.y, el = Math.sqrt(ex * ex + ey * ey) || 1;
+            if (Math.abs(el - a3 * 420) < 30) { p.vx += ex / el * 90 * dt * w3.amp; p.vy += ey / el * 90 * dt * w3.amp; }
+          }
+          p.vx *= (1 - dt * 1.4); p.vy += (-(8 + p.r * 6) - p.vy) * dt * .8;
+          p.x += p.vx * dt; p.y += p.vy * dt; p.tw += dt * 2.2;
+          if (p.y < -12 || p.x < -20 || p.x > W + 20) dust[di] = p = newDust(false);
+        }
+        var al = p.a * (.55 + .45 * Math.sin(p.tw)) * (narrow ? .8 : clamp(p.x / W + .25, .25, 1));
+        ctx.fillStyle = 'rgba(' + T.dust + ',' + al.toFixed(3) + ')';
+        ctx.fillRect(p.x, p.y, p.r * 1.6, p.r * 1.6);
+      }
+      if (running) {
+        if (!still || waves.length || power > .02) raf = requestAnimationFrame(draw); else running = false;
+      }
+    }
+    function start() { if (running || REDUCED) return; running = true; last = 0; raf = requestAnimationFrame(draw); }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+    function wake() { if (visible && !document.hidden) start(); }
+
+    size();
+    if (REDUCED) { draw(t0 + 4000); }
+    if (!REDUCED) {
+      hero.addEventListener('pointermove', function (e) {
+        var r = hero.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top;
+        if (!inside) { sx = px; sy = py; } inside = true; lastMove = performance.now(); wake();
+      }, { passive: true });
+      hero.addEventListener('pointerleave', function () { inside = false; });
+      hero.addEventListener('pointerdown', function (e) {
+        if (e.target.closest && e.target.closest('a,button,input,select,textarea,label')) return;
+        var r = hero.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top;
+        if (e.pointerType !== 'mouse') { sx = px; sy = py; }
+        pulse(px, py, 1.15); lastPulse = performance.now();
+      }, { passive: true });
+    }
+    var rt = 0;
+    if ('ResizeObserver' in window) new ResizeObserver(function () { clearTimeout(rt); rt = setTimeout(function () { size(); if (REDUCED || !running) draw(performance.now()); }, 80); }).observe(hero);
+    onVisible(hero, function (en, isIn) { visible = isIn; hero.classList.toggle('is-off', !isIn); if (isIn && !document.hidden) start(); else stop(); });
+    document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else if (visible) start(); });
+    motion.on(function (p) { if (!p) wake(); });
+    /* first beat: one soft release from the right so the field introduces itself */
+    if (!REDUCED) setTimeout(function () { pulse(W * .78, H * .5, .9); lastPulse = performance.now(); }, 650);
+  }
+
+  field($('#field'));
 
   /* ---------- colour ---------- */
   var PRIMARY = [
@@ -197,10 +391,10 @@
 
   /* ---------- photography ---------- */
   var PH = [
-    ['hero-poster', 'A TRE™ session room', 'Rooms'], ['hero-education-1600', 'A calm session room', 'Rooms'], ['hero-events-1600', 'Floor cushions and daylight', 'Rooms'],
-    ['module2-sep2026-2', 'Module 2 in session with Simba Stenqvist, Singapore, September 2026', 'Rooms'], ['module2-sep2026-4', 'TRE™ Module 2, September 2026', 'Rooms'], ['module2-sep2026-5', 'TRE™ Module 2, September 2026', 'Rooms'],
+    ['hero-poster', 'A TRE™ session room (home page film still)', 'Rooms'],
+    ['module2-sep2026-2', 'Module 2 in session with Simba Stenqvist, Singapore, September 2026', 'Rooms'],
     ['module2-sep2026-1', 'Isabelle teaching, TRE™ Module 2, September 2026', 'Training'], ['module2-sep2026-3', 'Sharing circle, TRE™ Module 2, September 2026', 'Training'],
-    ['hero-about-1600', 'A cohort together', 'Cohorts'], ['module2-sep2026-6', 'TRE™ Module 2 cohort, 26 to 27 September 2026, Singapore', 'Cohorts'], ['isabelle-students-module1-may2026', 'TRE™ Module 1, May 2026', 'Cohorts'], ['tre-module1-2026', 'TRE™ Module 1, January 2026', 'Cohorts'], ['uk-tre-providers-2', 'With UK TRE™ provider students', 'Cohorts'],
+    ['module2-sep2026-6', 'TRE™ Module 2 cohort, 26 to 27 September 2026, Singapore', 'Cohorts'], ['isabelle-students-module1-may2026', 'TRE™ Module 1, May 2026', 'Cohorts'], ['tre-module1-2026', 'TRE™ Module 1, January 2026', 'Cohorts'], ['uk-tre-providers-2', 'With UK TRE™ provider students', 'Cohorts'],
     ['asia-tre-trainers-david', 'Asia TRE™ trainers with David Berceli', 'Trainers'], ['isabelle-david-simba-nikki', 'Isabelle with David Berceli, Simba Stenqvist and Nikki Tay', 'Trainers'], ['danang-tre-conference-nov2025', 'Da Nang TRE™ Conference, November 2025', 'Trainers'], ['isabelle-vietnam-tre', 'TRE™ Asia Conference, Vietnam', 'Trainers']
   ];
   var cats = ['All'].concat(PH.reduce(function (a, p) { if (a.indexOf(p[2]) < 0) a.push(p[2]); return a; }, []));
